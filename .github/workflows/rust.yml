@@ -17,5 +17,7 @@ jobs:
     - run: rustup update ${{ matrix.rust }} && rustup default ${{ matrix.rust }}
     - name: Build
       run: cargo build --verbose
+    - name: Run Code
+      run: cargo run
     - name: Run Test
       run: cargo test --verbose
