@@ -43,10 +43,9 @@ pub fn process_pr_description(pr_description: &str, max_threshold: u32) -> Vec<u
 
 /// Post a comment on a GitHub PR.
 pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let repo = env::var("GITHUB_REPOSITORY")?; // Ensure the GitHub repository is correctly set
     let url = format!(
         "https://api.github.com/repos/{}/issues/{}/comments",
-        repo,
+        std::env::var("GITHUB_REPOSITORY")?, // GitHub repository in format "owner/repo"
         pr_number
     );
 
@@ -63,7 +62,11 @@ pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<
     if response.status().is_success() {
         println!("Successfully posted comment.");
     } else {
-        println!("Failed to post comment: {}", response.status());
+        eprintln!("Failed to post comment: {}", response.status());
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Failed to post comment: {}", response.status()),
+        )));
     }
 
     Ok(())
