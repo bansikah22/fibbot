@@ -1,7 +1,9 @@
-use fibbot::fib::{extract_numbers, compute_fibonacci, process_pr_description};
+use fibbot::fib::{compute_fibonacci, process_pr_description, post_comment};
 use std::env;
+use tokio;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // Retrieve input parameters from GitHub Actions environment variables
     let enable_fib = env::var("INPUT_ENABLE_FIB").unwrap_or_else(|_| "true".to_string());
     let max_threshold = env::var("INPUT_MAX_THRESHOLD").unwrap_or_else(|_| "100".to_string());
@@ -9,20 +11,42 @@ fn main() {
     // Convert max_threshold to an integer
     let max_threshold: u32 = max_threshold.parse().unwrap_or(100);
 
+    // Get the PR number and GitHub token
+    let pr_number = env::var("GITHUB_REF")
+        .unwrap_or_else(|_| "refs/pull/0/merge".to_string())
+        .split('/')
+        .nth(2)
+        .unwrap_or("0")
+        .parse::<u64>()
+        .unwrap_or(0);
+
+    let github_token = env::var("GITHUB_TOKEN").unwrap_or_else(|_| "".to_string());
+
     // Print parsed values (for testing)
     println!("Enable Fibonacci Calculation: {}", enable_fib);
     println!("Max Threshold: {}", max_threshold);
 
-    // Call the imported functions here
-    let fib_sequence = compute_fibonacci(max_threshold);
-    println!("Fibonacci Sequence: {:?}", fib_sequence);
+    // Compute Fibonacci Sequence
+    if enable_fib == "true" {
+        let fib_sequence = compute_fibonacci(max_threshold);
+        println!("Fibonacci Sequence: {:?}", fib_sequence);
 
-    let pr_description = "Fixes issues 12, 34, and 56.";
-    let numbers = extract_numbers(pr_description);
-    println!("Extracted Numbers: {:?}", numbers);
+        // Extract PR numbers and match against Fibonacci sequence
+        let pr_description = "Fixes issues 12, 34, and 56.";
+        let matching_fib_numbers = process_pr_description(pr_description, max_threshold);
+        println!("Matching Fibonacci Numbers: {:?}", matching_fib_numbers);
 
-
-    let pr_description = "Updated files for issues 3, 5, 8, and 13.";
-    let matching_fib_numbers = process_pr_description(pr_description, max_threshold);
-    println!("Matching Fibonacci Numbers: {:?}", matching_fib_numbers);
+        // Post a comment on GitHub with the matching Fibonacci numbers
+        let comment = format!(
+            "The following numbers from the PR description are Fibonacci numbers: {:?}",
+            matching_fib_numbers
+        );
+        if !github_token.is_empty() {
+            post_comment(pr_number, &comment, &github_token).await.unwrap();
+        } else {
+            println!("GitHub token is missing.");
+        }
+    } else {
+        println!("Fibonacci calculation is disabled.");
+    }
 }

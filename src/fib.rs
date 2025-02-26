@@ -1,4 +1,11 @@
+use reqwest::Client;
+use serde::Serialize;
 use regex::Regex;
+
+#[derive(Serialize)]
+struct Comment {
+    body: String,
+}
 
 /// Extracts numbers from a given PR description string.
 pub fn extract_numbers(pr_description: &str) -> Vec<u32> {
@@ -31,4 +38,31 @@ pub fn process_pr_description(pr_description: &str, max_threshold: u32) -> Vec<u
         .into_iter()
         .filter(|num| fib_sequence.contains(num))
         .collect()
+}
+
+/// Post a comment on a GitHub PR.
+pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let url = format!(
+        "https://api.github.com/repos/{}/issues/{}/comments",
+        std::env::var("GITHUB_REPOSITORY")?, // GitHub repository in format "owner/repo"
+        pr_number
+    );
+
+    let client = Client::new();
+    let comment = Comment { body: comment.to_string() };
+
+    let response = client
+        .post(&url)
+        .bearer_auth(token)
+        .json(&comment)
+        .send()
+        .await?;
+
+    if response.status().is_success() {
+        println!("Successfully posted comment.");
+    } else {
+        println!("Failed to post comment: {}", response.status());
+    }
+
+    Ok(())
 }

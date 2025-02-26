@@ -1,4 +1,4 @@
-use fibbot::fib::{extract_numbers, compute_fibonacci, process_pr_description}; 
+use fibbot::fib::{extract_numbers, compute_fibonacci, process_pr_description};
 
 #[test]
 fn test_extract_numbers() {
