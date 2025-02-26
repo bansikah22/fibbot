@@ -1,5 +1,5 @@
 name: "Run FibBot Action"
-on: [pull_request, push]
+on: [pull_request]
 
 jobs:
   test-action:
@@ -11,4 +11,3 @@ jobs:
         with:
           enable_fib: "true"
           max_threshold: "500"
-
