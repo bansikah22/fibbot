@@ -8,17 +8,17 @@
   - Used `std::env::var()` to read inputs.
   - Parsed the `max_threshold` input as an integer and applied the default value if the input is invalid or missing.
   - Used the `enable_fib` parameter to control whether the Fibonacci calculation is enabled.
-  
+
 ## **Milestone 2: Local Testing of Parameters**
 - [x] Tested the parameter parsing functionality locally:
   - Demonstrated that the `max_threshold` is parsed correctly with the default value (`100`) when no value is provided.
   - Tested the `enable_fib` flag with both `"true"` and `"false"` values.
   - Verified that invalid or missing `max_threshold` values fall back to the default (`100`).
-  
+
 - [x] **To test locally, exported the environment variables**:
   - `export INPUT_ENABLE_FIB=true`
   - `export INPUT_MAX_THRESHOLD=100`
-  
+
 - [x] Validated the parameter parsing by printing the values of `enable_fib` and `max_threshold` during local testing.
 
 ## **Verification**

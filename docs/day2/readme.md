@@ -21,4 +21,3 @@
 - [x] Validated that the workflow runs automatically when code is pushed.
 
 ✅ **Day 2 successfully completed!** The Rust action is running in GitHub Actions and is ready for further development. 🚀
-
