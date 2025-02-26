@@ -11,10 +11,10 @@ async fn main() {
     // Convert max_threshold to an integer
     let max_threshold: u32 = max_threshold.parse().unwrap_or(100);
 
-    //verify github token
-    let _github_token = env::var("GITHUB_TOKEN").unwrap_or_else(|_| "".to_string());
+    // Ensure GitHub token is available
+    let github_token = env::var("GITHUB_TOKEN").unwrap_or_else(|_| "".to_string());
 
-    // Get the PR number and GitHub token
+    // Get the PR number from the GitHub context (GITHUB_REF) to determine which PR we are commenting on
     let pr_number = env::var("GITHUB_REF")
         .unwrap_or_else(|_| "refs/pull/0/merge".to_string())
         .split('/')
@@ -22,8 +22,6 @@ async fn main() {
         .unwrap_or("0")
         .parse::<u64>()
         .unwrap_or(0);
-
-    let github_token = env::var("GITHUB_TOKEN").unwrap_or_else(|_| "".to_string());
 
     // Print parsed values (for testing)
     println!("Enable Fibonacci Calculation: {}", enable_fib);
@@ -35,7 +33,7 @@ async fn main() {
         println!("Fibonacci Sequence: {:?}", fib_sequence);
 
         // Extract PR numbers and match against Fibonacci sequence
-        let pr_description = "Fixes issues 12, 34, and 56.";
+        let pr_description = "Fixes issues 12, 34, and 56."; // Replace with the PR description
         let matching_fib_numbers = process_pr_description(pr_description, max_threshold);
         println!("Matching Fibonacci Numbers: {:?}", matching_fib_numbers);
 
@@ -45,7 +43,11 @@ async fn main() {
             matching_fib_numbers
         );
         if !github_token.is_empty() {
-            post_comment(pr_number, &comment, &github_token).await.unwrap();
+            // Only attempt to post a comment if the token is available
+            match post_comment(pr_number, &comment, &github_token).await {
+                Ok(_) => println!("Successfully posted the comment."),
+                Err(err) => eprintln!("Failed to post comment: {}", err),
+            }
         } else {
             println!("GitHub token is missing.");
         }

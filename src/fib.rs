@@ -1,6 +1,7 @@
 use reqwest::Client;
 use serde::Serialize;
 use regex::Regex;
+use std::env;
 
 #[derive(Serialize)]
 struct Comment {
@@ -42,9 +43,10 @@ pub fn process_pr_description(pr_description: &str, max_threshold: u32) -> Vec<u
 
 /// Post a comment on a GitHub PR.
 pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let repo = env::var("GITHUB_REPOSITORY")?; // Ensure the GitHub repository is correctly set
     let url = format!(
         "https://api.github.com/repos/{}/issues/{}/comments",
-        std::env::var("GITHUB_REPOSITORY")?, // GitHub repository in format "owner/repo"
+        repo,
         pr_number
     );
 
