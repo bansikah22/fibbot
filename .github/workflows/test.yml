@@ -4,11 +4,22 @@ on: [pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Install Rust
+        run: rustup install stable
+        shell: bash
+
+      - name: Install Dependencies
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+          source $HOME/.cargo/env
+        shell: bash
+
+      - name: Set up Rust environment
         run: rustup show
         shell: bash
 
