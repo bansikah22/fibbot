@@ -58,15 +58,13 @@ pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<
         .send()
         .await?;
 
-    if response.status().is_success() {
-        println!("Successfully posted comment.");
-    } else {
-        eprintln!("Failed to post comment: {}", response.status());
-        return Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Failed to post comment: {}", response.status()),
-        )));
-    }
+        if response.status().is_success() {
+            println!("Successfully posted comment.");
+        } else {
+            eprintln!("Failed to post comment: {}", response.status());
+            // Setting the output to indicate failure
+            std::process::exit(1);  // Exit with error code to fail the workflow
+        }        
 
     Ok(())
 }
