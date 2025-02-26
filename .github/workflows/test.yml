@@ -5,8 +5,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: rustup show
+        shell: bash
+
       - name: Run FibBot Action
-        uses: ./ 
+        uses: ./
         with:
           enable_fib: true
           max_threshold: 1000

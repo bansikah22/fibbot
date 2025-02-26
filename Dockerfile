@@ -9,5 +9,8 @@ COPY . .
 # Build the Rust project
 RUN cargo build --release
 
+# Ensure binary is executable
+RUN chmod +x ./target/release/fibbot
+
 # Set the command to run the compiled binary
 CMD ["./target/release/fibbot"]
