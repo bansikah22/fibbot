@@ -11,6 +11,9 @@ async fn main() {
     // Convert max_threshold to an integer
     let max_threshold: u32 = max_threshold.parse().unwrap_or(100);
 
+    //verify github token
+    let _github_token = env::var("GITHUB_TOKEN").unwrap_or_else(|_| "".to_string());
+
     // Get the PR number and GitHub token
     let pr_number = env::var("GITHUB_REF")
         .unwrap_or_else(|_| "refs/pull/0/merge".to_string())
