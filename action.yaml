@@ -1,14 +1,31 @@
-name: "FibBot"
-description: "Extracts numbers from PRs and computes Fibonacci sequences"
+name: "FibBot Action"
+description: "A Rust-based GitHub Action to compute Fibonacci sequences."
 inputs:
   enable_fib:
-    description: "Enable Fibonacci calculation"
+    description: "Enable Fibonacci computation"
     required: true
-    default: "true"
   max_threshold:
-    description: "Maximum Fibonacci number limit"
-    required: false
-    default: "100"
+    description: "Maximum threshold for Fibonacci computation"
+    required: true
 runs:
-  using: "docker"
-  image: "Dockerfile"
+  using: "composite"
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install Rust Toolchain
+      run: |
+        rustup show
+      shell: bash
+
+    - name: Build the Rust Project
+      run: cargo build --release
+      shell: bash
+
+    - name: Run the FibBot Binary
+      run: ./target/release/fibbot
+      shell: bash
+      env:
+        INPUT_ENABLE_FIB: ${{ inputs.enable_fib }}
+        INPUT_MAX_THRESHOLD: ${{ inputs.max_threshold }}
+
