@@ -1,7 +1,6 @@
 use reqwest::Client;
 use serde::Serialize;
 use regex::Regex;
-use std::env;
 
 #[derive(Serialize)]
 struct Comment {
