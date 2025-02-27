@@ -1,6 +1,6 @@
 name: Test and Run FibBot
 
-on: [push, pull_request]
+on: [pull_request]
 
 permissions:
   contents: write  # Allow action to write to repository contents
