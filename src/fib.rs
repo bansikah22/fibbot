@@ -64,7 +64,7 @@ pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<
             eprintln!("Failed to post comment: {}", response.status());
             // Setting the output to indicate failure
             std::process::exit(1);  // Exit with error code to fail the workflow
-        }        
+        }
 
     Ok(())
 }

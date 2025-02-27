@@ -1,2 +1,2 @@
 // src/lib.rs
-pub mod fib; 
+pub mod fib;
