@@ -32,5 +32,3 @@ jobs:
           max_threshold: 1000
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
