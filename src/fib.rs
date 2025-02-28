@@ -48,6 +48,9 @@ pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<
         pr_number
     );
 
+    println!("Posting comment to URL: {}", url);
+    println!("Comment: {}", comment);
+
     let client = Client::new();
     let comment = Comment { body: comment.to_string() };
 
@@ -58,13 +61,15 @@ pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<
         .send()
         .await?;
 
-        if response.status().is_success() {
-            println!("Successfully posted comment.");
-        } else {
-            eprintln!("Failed to post comment: {}", response.status());
-            // Setting the output to indicate failure
-            std::process::exit(1);  // Exit with error code to fail the workflow
-        }
+    let status = response.status(); // Store the status before moving `response`
+    
+    if status.is_success() {
+        println!("Successfully posted comment.");
+    } else {
+        let body = response.text().await?; // Now you can safely call `text()`
+        eprintln!("Failed to post comment: {} - Response body: {}", status, body);
+        std::process::exit(1);  // Exit with error code to fail the workflow
+    }
 
     Ok(())
 }
