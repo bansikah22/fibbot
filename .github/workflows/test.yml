@@ -31,10 +31,10 @@ jobs:
       - name: Debug GitHub Token
         run: |
           if [[ -z "${{ secrets.GITHUB_TOKEN }}" ]]; then
-            echo "❌ GITHUB_TOKEN is missing!"
+            echo "GITHUB_TOKEN is missing!"
             exit 1
           else
-            echo "✅ GITHUB_TOKEN is set!"
+            echo "GITHUB_TOKEN is set!"
           fi
 
       - name: Run FibBot Action
@@ -42,4 +42,4 @@ jobs:
         with:
           enable_fib: true
           max_threshold: 1000
-          github-token: ${{ secrets.GITHUB_TOKEN }}  # ✅ Pass as input instead of env
+          github-token: ${{ secrets.GITHUB_TOKEN }}  
