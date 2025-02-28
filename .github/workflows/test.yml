@@ -3,9 +3,9 @@ name: Test and Run FibBot
 on: [pull_request]
 
 permissions:
-  contents: write  # Allow action to write to repository contents
-  issues: write  # Allow action to write to issues (including pull requests)
-  pull-requests: write  # Allow action to interact with pull requests (like commenting)
+  contents: read  # Explicitly set contents to read
+  issues: write  # Allow writing to issues (including PRs)
+  pull-requests: write  # Allow posting comments on PRs
 
 jobs:
   build:
@@ -28,10 +28,18 @@ jobs:
         run: cargo test
         shell: bash
 
+      - name: Debug GitHub Token
+        run: |
+          echo "Testing GitHub API with Token..."
+          curl -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run FibBot Action
         uses: ./
         with:
           enable_fib: true
           max_threshold: 1000
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}  
