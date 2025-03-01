@@ -1,4 +1,4 @@
-use fibbot::fib::{compute_fibonacci, process_pr_description, post_comment};
+use fibbot::fib::{compute_fibonacci, process_pr_description, post_comment, format_comment, extract_numbers};
 use std::env;
 use tokio;
 use serde_json;
@@ -54,44 +54,58 @@ async fn main() {
         }
     };
     
-    // Get the PR description
-    let pr_description = match env::var("GITHUB_EVENT_PATH") {
+    // Get the PR description, title and content
+    let (pr_description, pr_title) = match env::var("GITHUB_EVENT_PATH") {
         Ok(event_path) => {
             match std::fs::read_to_string(event_path) {
                 Ok(contents) => {
                     match serde_json::from_str::<serde_json::Value>(&contents) {
                         Ok(event) => {
-                            event["pull_request"]["body"].as_str().unwrap_or("").to_string()
+                            let body = event["pull_request"]["body"].as_str().unwrap_or("").to_string();
+                            let title = event["pull_request"]["title"].as_str().unwrap_or("").to_string();
+                            (body, title)
                         },
-                        Err(_) => "".to_string()
+                        Err(_) => ("".to_string(), "".to_string())
                     }
                 },
-                Err(_) => "".to_string()
+                Err(_) => ("".to_string(), "".to_string())
             }
         },
-        Err(_) => "".to_string()
+        Err(_) => ("".to_string(), "".to_string())
     };
+    
+    // Combine title and description for number extraction
+    let pr_content = format!("{} {}", pr_title, pr_description);
     
     // Print parsed values (for testing)
     println!("Enable Fibonacci Calculation: {}", enable_fib);
     println!("Max Threshold: {}", max_threshold);
     println!("PR Number: {}", pr_number);
+    println!("PR Title: {}", pr_title);
     println!("PR Description: {}", pr_description);
     println!("GitHub Token length: {}", github_token.len());
     
     // Compute Fibonacci Sequence
     if enable_fib == "true" {
         let fib_sequence = compute_fibonacci(max_threshold);
-        println!("Fibonacci Sequence: {:?}", fib_sequence);
+        println!("Fibonacci Sequence up to {}: {:?}", max_threshold, fib_sequence);
         
-        // Extract PR numbers and match against Fibonacci sequence
-        let matching_fib_numbers = process_pr_description(&pr_description, max_threshold);
-        println!("Matching Fibonacci Numbers: {:?}", matching_fib_numbers);
+        // Extract all numbers from PR content
+        let all_numbers = extract_numbers(&pr_content);
+        println!("All numbers found in PR: {:?}", all_numbers);
         
-        // Post a comment on GitHub with the matching Fibonacci numbers
-        let comment = format!(
-            "FibBot Analysis Result:\n\nThe following numbers from the PR description are Fibonacci numbers: {:?}",
-            matching_fib_numbers
+        // Process PR content to get Fibonacci and non-Fibonacci numbers
+        let (fibonacci_numbers, non_fibonacci_numbers) = process_pr_description(&pr_content, max_threshold);
+        
+        println!("Fibonacci Numbers: {:?}", fibonacci_numbers);
+        println!("Non-Fibonacci Numbers: {:?}", non_fibonacci_numbers);
+        
+        // Generate a formatted comment
+        let comment = format_comment(
+            &fibonacci_numbers,
+            &non_fibonacci_numbers,
+            &all_numbers,
+            max_threshold
         );
         
         if !github_token.is_empty() && pr_number > 0 {
@@ -107,6 +121,8 @@ async fn main() {
             if pr_number == 0 {
                 println!("Invalid PR number.");
             }
+            // Print the comment to console for debugging
+            println!("Comment that would be posted:\n{}", comment);
         }
     } else {
         println!("Fibonacci calculation is disabled.");
