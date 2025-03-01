@@ -20,5 +20,5 @@ fn test_fibonacci_sequence() {
 #[test]
 fn test_process_pr_description() {
     let pr_description = "Updated files for issues 3, 5, 8, and 13.";
-    assert_eq!(process_pr_description(pr_description, 20), vec![3, 5, 8, 13]);
+    assert_eq!(process_pr_description(pr_description, 20), (vec![3, 5, 8, 13], vec![]));
 }
