@@ -33,7 +33,6 @@ pub fn compute_fibonacci(n: u32) -> Vec<u32> {
 pub fn process_pr_description(pr_description: &str, max_threshold: u32) -> Vec<u32> {
     let numbers = extract_numbers(pr_description);
     let fib_sequence = compute_fibonacci(max_threshold);
-
     numbers
         .into_iter()
         .filter(|num| fib_sequence.contains(num))
@@ -42,34 +41,38 @@ pub fn process_pr_description(pr_description: &str, max_threshold: u32) -> Vec<u
 
 /// Post a comment on a GitHub PR.
 pub async fn post_comment(pr_number: u64, comment: &str, token: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let repo = std::env::var("GITHUB_REPOSITORY")?;
     let url = format!(
         "https://api.github.com/repos/{}/issues/{}/comments",
-        std::env::var("GITHUB_REPOSITORY")?, // GitHub repository in format "owner/repo"
+        repo,
         pr_number
     );
-
+    
     println!("Posting comment to URL: {}", url);
-    println!("Comment: {}", comment);
-
+    println!("PR number: {}", pr_number);
+    println!("Repository: {}", repo);
+    
     let client = Client::new();
-    let comment = Comment { body: comment.to_string() };
-
+    let comment_data = Comment { body: comment.to_string() };
+    
+    println!("Sending request to GitHub API...");
     let response = client
         .post(&url)
         .bearer_auth(token)
-        .json(&comment)
+        .header("User-Agent", "fibbot-action")
+        .header("Accept", "application/vnd.github.v3+json")
+        .json(&comment_data)
         .send()
         .await?;
-
-    let status = response.status(); // Store the status before moving `response`
     
-    if status.is_success() {
+    if response.status().is_success() {
         println!("Successfully posted comment.");
     } else {
-        let body = response.text().await?; // Now you can safely call `text()`
-        eprintln!("Failed to post comment: {} - Response body: {}", status, body);
+        let status = response.status();
+        let error_text = response.text().await?;
+        eprintln!("Failed to post comment: {} - {}", status, error_text);
         std::process::exit(1);  // Exit with error code to fail the workflow
     }
-
+    
     Ok(())
 }
