@@ -13,27 +13,9 @@ inputs:
     description: "GitHub token for API operations"
     required: true
 runs:
-  using: "composite"
-  steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-    
-    - name: Install Rust Toolchain
-      run: rustup show
-      shell: bash
-    
-    - name: Build the Rust Project
-      run: |
-        cargo clean
-        cargo build --release --verbose
-        chmod +x ./target/release/fibbot
-        ls -lah ./target/release/
-      shell: bash
-    
-    - name: Run the FibBot Binary
-      run: ./target/release/fibbot
-      shell: bash
-      env:
-        INPUT_ENABLE_FIB: ${{ inputs.enable_fib }}
-        INPUT_MAX_THRESHOLD: ${{ inputs.max_threshold }}
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+  using: "docker"
+  image: "Dockerfile"
+  env:
+    INPUT_ENABLE_FIB: ${{ inputs.enable_fib }}
+    INPUT_MAX_THRESHOLD: ${{ inputs.max_threshold }}
+    GITHUB_TOKEN: ${{ inputs.github_token }}
