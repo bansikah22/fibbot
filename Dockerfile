@@ -1,27 +1,14 @@
-# Stage 1: Build the Rust project
+# Stage 1: Build
 FROM rust:latest AS builder
-
 WORKDIR /app
-
-# Cache dependencies
-COPY Cargo.toml Cargo.lock ./
-RUN cargo fetch
-
-# Copy the source code
 COPY . .
+RUN cargo build --release
 
-# Update Cargo and build the project
-RUN rustup update && cargo build --release
-
-# Stage 2: Create the final image
-FROM debian:buster-slim
-
+# Stage 2: Runtime
+FROM debian:latest
 WORKDIR /app
+COPY --from=builder /app/target/release/fibbot /app/fibbot
+COPY --from=builder /app/Cargo.toml /app/Cargo.toml
+COPY --from=builder /app/Cargo.lock /app/Cargo.lock
 
-# Copy the built binary from the builder stage
-COPY --from=builder /app/target/release/fibbot .
-
-# Ensure the binary is executable
-RUN chmod +x fibbot
-
-CMD ["./fibbot"]
+CMD ["/app/fibbot"]
