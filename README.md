@@ -23,20 +23,28 @@ To use the FibBot GitHub Action in your project, you need to add the action to y
 2. **Configure the action** within the workflow:
 
 ```yaml
-name: Use FibBot Custom Action
-on: [pull_request]
+name: Test FibBot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
-  run-fibbot:
+  test-fibbot:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
+        
       - name: Run FibBot Action
-        uses: bansikah22/fibbot@master
+        uses: bansikah22/fibbot@master  
         with:
-          enable_fib: true # false to disable
+          enable_fib: true
           max_threshold: 1000
           github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
