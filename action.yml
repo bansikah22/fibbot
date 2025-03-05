@@ -1,5 +1,6 @@
 name: "FibBot Action"
 description: "A Rust-based GitHub Action to compute Fibonacci sequences."
+
 inputs:
   enable_fib:
     description: "Enable Fibonacci computation"
@@ -28,7 +29,7 @@ runs:
       run: |
         cargo clean
         cargo build --release --verbose
-        ls -lah ./target/release/
+        find ./target/release -type f -executable
         if [ ! -f "./target/release/fibbot" ]; then
           echo "Error: fibbot binary not found!"
           exit 1
