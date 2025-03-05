@@ -1,6 +1,5 @@
 name: "FibBot Action"
 description: "A Rust-based GitHub Action to compute Fibonacci sequences."
-
 inputs:
   enable_fib:
     description: "Enable Fibonacci computation"
@@ -17,8 +16,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout Repository
+    - name: Checkout FibBot Repository
       uses: actions/checkout@v4
+      with:
+        repository: bansikah22/fibbot
+        path: fibbot
 
     - name: Set up Rust
       uses: dtolnay/rust-toolchain@stable
@@ -27,9 +29,10 @@ runs:
 
     - name: Build the Rust Project
       run: |
+        cd fibbot
         cargo clean
         cargo build --release --verbose
-        find ./target/release -type f -executable
+        ls -lah ./target/release/
         if [ ! -f "./target/release/fibbot" ]; then
           echo "Error: fibbot binary not found!"
           exit 1
@@ -38,7 +41,9 @@ runs:
       shell: bash
 
     - name: Run the FibBot Binary
-      run: ./target/release/fibbot
+      run: |
+        cd fibbot
+        ./target/release/fibbot
       shell: bash
       env:
         INPUT_ENABLE_FIB: ${{ inputs.enable_fib }}
