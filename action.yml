@@ -12,10 +12,34 @@ inputs:
   github_token:
     description: "GitHub token for API operations"
     required: true
+
 runs:
-  using: "docker"
-  image: "Dockerfile"
-  env:
-    INPUT_ENABLE_FIB: ${{ inputs.enable_fib }}
-    INPUT_MAX_THRESHOLD: ${{ inputs.max_threshold }}
-    GITHUB_TOKEN: ${{ inputs.github_token }}
+  using: "composite"
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+
+    - name: Build the Rust Project
+      run: |
+        cargo clean
+        cargo build --release --verbose
+        ls -lah ./target/release/
+        if [ ! -f "./target/release/fibbot" ]; then
+          echo "Error: fibbot binary not found!"
+          exit 1
+        fi
+        chmod +x ./target/release/fibbot
+      shell: bash
+
+    - name: Run the FibBot Binary
+      run: ./target/release/fibbot
+      shell: bash
+      env:
+        INPUT_ENABLE_FIB: ${{ inputs.enable_fib }}
+        INPUT_MAX_THRESHOLD: ${{ inputs.max_threshold }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
